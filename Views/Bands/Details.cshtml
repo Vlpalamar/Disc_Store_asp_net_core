@@ -1,0 +1,45 @@
+﻿@using Disc_Store.Entities
+@model Disc_Store.Entities.Band
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h1>Details</h1>
+
+<div>
+    <h4>Band</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.name)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.name)
+        </dd>
+        <dt class="col-sm-2">
+            Музыканты в группе:
+        </dt>
+        <dd class="col-sm-10">
+            @foreach (Musician item in ViewBag.Musicians)
+            {
+                @item.name
+                <br>
+            }
+        </dd>
+        <dt class="col-sm-2">
+            Дискография группы:
+        </dt>
+        <dd class="col-sm-10">
+            @foreach (Disc item in ViewBag.discs)
+            {
+                @item.name
+                <br>
+            }
+        </dd>
+    </dl>
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model.id">Edit</a> |
+    <a asp-action="Index">Back to List</a>
+</div>
