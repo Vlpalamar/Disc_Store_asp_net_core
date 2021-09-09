@@ -10,22 +10,22 @@ using Disc_Store.Entities;
 
 namespace Disc_Store.Controllers.Admin
 {
-    public class BandsController : Controller
+    public class LabelsController : Controller
     {
         private readonly ApplicationDbContext _context;
 
-        public BandsController(ApplicationDbContext context)
+        public LabelsController(ApplicationDbContext context)
         {
             _context = context;
         }
 
-        // GET: Bands
+        // GET: Labels
         public async Task<IActionResult> Index()
         {
-            return View(await _context.bands.ToListAsync());
+            return View(await _context.labels.ToListAsync());
         }
 
-        // GET: Bands/Details/5
+        // GET: Labels/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -33,50 +33,46 @@ namespace Disc_Store.Controllers.Admin
                 return NotFound();
             }
 
-            var band = await _context.bands
-                .Include(m=>m.musicians)
-                .Include(b=>b.discs)
+            var label = await _context.labels
+                .Include(l=>l.Discs)
                 .FirstOrDefaultAsync(m => m.id == id);
-            ViewBag.Musicians = band.musicians;
-            ViewBag.discs = band.discs;
-            if (band == null)
+            ViewBag.discs = label.Discs;
+            if (label == null)
             {
                 return NotFound();
             }
 
-            return View(band);
+            return View(label);
         }
 
-        // GET: Bands/Create
+        // GET: Labels/Create
         public IActionResult Create()
         {
-           
-           ViewBag.musiciansIds = new SelectList(_context.musicians, "id", "name");
-           ViewBag.discsIds = new SelectList(_context.discs, "id", "name");
+            ViewBag.discsIds = new SelectList(_context.discs, "id", "name");
             return View();
         }
 
-        // POST: Bands/Create
+        // POST: Labels/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("id,name")] Band band, int[] musicians,int[] discs) 
+        public async Task<IActionResult> Create([Bind("id,name")] Label label, int[] Discs)
         {
             if (ModelState.IsValid)
             {
-                band.musicians = _context.musicians.Where(m => musicians.Contains(m.id)).ToList();
-                    _context.Add(band);
-                    band.discs = _context.discs.Where(d => discs.Contains(d.id)).ToList();
-                    _context.Add(band);
+
+               
+                label.Discs= _context.discs.Where(d => Discs.Contains(d.id)).ToList();
+                _context.Add(label);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
+
             }
-          
-            return View(band);
+            return View(label);
         }
 
-        // GET: Bands/Edit/5
+        // GET: Labels/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -84,61 +80,56 @@ namespace Disc_Store.Controllers.Admin
                 return NotFound();
             }
 
-            var band = await _context.bands
-                .Include(b=>b.musicians)
-                .Include(b => b.discs)
+            var label = await _context.labels
+                .Include(l=>l.Discs)
                 .FirstOrDefaultAsync(m => m.id == id);
-            if (band == null)
+            if (label == null)
             {
                 return NotFound();
             }
-            ViewBag.musiciansIds = new SelectList(_context.musicians, "id", "name");
             ViewBag.discsIds = new SelectList(_context.discs, "id", "name");
-
-            return View(band);
+            return View(label);
         }
 
-        // POST: Bands/Edit/5
+        // POST: Labels/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("id,name")] Band band, int[] musicians, int[] discs)
+        public async Task<IActionResult> Edit(int id, [Bind("id,name")] Label label, int[] Discs)
         {
-            if (id != band.id)
+            if (id != label.id)
             {
                 return NotFound();
             }
 
-            _context.Entry(band).State=EntityState.Modified;
+
+            _context.Entry(label).State = EntityState.Modified;
 
             await _context.SaveChangesAsync();
 
-             band = _context.bands
-                .Where(b => b.id == band.id)
-                .Include(b=>b.musicians)
-                .Include(d=>d.discs)
+            label = _context.labels
+                .Where(b => b.id == label.id)
+                .Include(b => b.Discs)
                 .First();
+
 
             if (ModelState.IsValid)
             {
                 try
                 {
-                    if (musicians!=null)
-                    {
-                        band.musicians = _context.musicians.Where(m => musicians.Contains(m.id)).ToList();
-                    }
 
-                    if (discs!=null)
+                    if (Discs != null)
                     {
-                        band.discs = _context.discs.Where(m => discs.Contains(m.id)).ToList();
+                        label.Discs = _context.discs.Where(m => Discs.Contains(m.id)).ToList();
+
                     }
-                    _context.Update(band);
+                    _context.Update(label);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!BandExists(band.id))
+                    if (!LabelExists(label.id))
                     {
                         return NotFound();
                     }
@@ -149,11 +140,10 @@ namespace Disc_Store.Controllers.Admin
                 }
                 return RedirectToAction(nameof(Index));
             }
-           // ViewData["BandId"] = new SelectList(_context.bands, "id", "name");
-            return View(band);
+            return View(label);
         }
 
-        // GET: Bands/Delete/5
+        // GET: Labels/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -161,30 +151,30 @@ namespace Disc_Store.Controllers.Admin
                 return NotFound();
             }
 
-            var band = await _context.bands
+            var label = await _context.labels
                 .FirstOrDefaultAsync(m => m.id == id);
-            if (band == null)
+            if (label == null)
             {
                 return NotFound();
             }
 
-            return View(band);
+            return View(label);
         }
 
-        // POST: Bands/Delete/5
+        // POST: Labels/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var band = await _context.bands.FindAsync(id);
-            _context.bands.Remove(band);
+            var label = await _context.labels.FindAsync(id);
+            _context.labels.Remove(label);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool BandExists(int id)
+        private bool LabelExists(int id)
         {
-            return _context.bands.Any(e => e.id == id);
+            return _context.labels.Any(e => e.id == id);
         }
     }
 }

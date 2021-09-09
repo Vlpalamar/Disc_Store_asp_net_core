@@ -4,14 +4,16 @@ using Disc_Store.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Disc_Store.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210908185641_MyUser")]
+    partial class MyUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -198,6 +200,26 @@ namespace Disc_Store.Data.Migrations
                     b.ToTable("roles");
                 });
 
+            modelBuilder.Entity("Disc_Store.Entities.UserRole", b =>
+                {
+                    b.Property<int>("id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("MyUserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("id");
+
+                    b.HasIndex("MyUserId");
+
+                    b.ToTable("UserRole");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
                     b.Property<string>("Id")
@@ -372,6 +394,13 @@ namespace Disc_Store.Data.Migrations
                     b.Navigation("roleInGroup");
                 });
 
+            modelBuilder.Entity("Disc_Store.Entities.UserRole", b =>
+                {
+                    b.HasOne("Disc_Store.Entities.MyUser", null)
+                        .WithMany("Roles")
+                        .HasForeignKey("MyUserId");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -431,6 +460,11 @@ namespace Disc_Store.Data.Migrations
             modelBuilder.Entity("Disc_Store.Entities.Label", b =>
                 {
                     b.Navigation("Discs");
+                });
+
+            modelBuilder.Entity("Disc_Store.Entities.MyUser", b =>
+                {
+                    b.Navigation("Roles");
                 });
 #pragma warning restore 612, 618
         }

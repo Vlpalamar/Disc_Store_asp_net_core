@@ -10,22 +10,22 @@ using Disc_Store.Entities;
 
 namespace Disc_Store.Controllers.Admin
 {
-    public class MusiciansController : Controller
+    public class DiscsController : Controller
     {
         private readonly ApplicationDbContext _context;
 
-        public MusiciansController(ApplicationDbContext context)
+        public DiscsController(ApplicationDbContext context)
         {
             _context = context;
         }
 
-        // GET: Musicians
+        // GET: Discs
         public async Task<IActionResult> Index()
         {
-            return View(await _context.musicians.ToListAsync());
+            return View(await _context.discs.ToListAsync());
         }
 
-        // GET: Musicians/Details/5
+        // GET: Discs/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -33,41 +33,54 @@ namespace Disc_Store.Controllers.Admin
                 return NotFound();
             }
 
-            var musician = await _context.musicians.Include(m=>m.roleInGroup)
+
+            var  disc  = await  _context.discs.Include(d=>d.band).Include(d=>d.label)
                 .FirstOrDefaultAsync(m => m.id == id);
-            if (musician == null)
+            if (disc.label!=null)
+            {
+                ViewBag.labalId = disc.label.name;
+            }
+            if (disc.band != null)
+            {
+                ViewBag.bandId = disc.band.name;
+            }
+            
+            if (disc == null)
             {
                 return NotFound();
             }
 
-            return View(musician);
+            return View(disc);
         }
 
-        // GET: Musicians/Create
+        // GET: Discs/Create
         public IActionResult Create()
         {
-            ViewBag.Role = new SelectList(_context.roles, "id", "roleName");
+            ViewBag.BandId = new SelectList(_context.bands, "id", "name");
+            ViewBag.LableId = new SelectList(_context.labels, "id", "name");
             return View();
         }
 
-        // POST: Musicians/Create
+        // POST: Discs/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("id,name")] Musician musician,int roleInGroup)
+        public async Task<IActionResult> Create([Bind("id,name,dateOfPublish,price")] Disc disc,int band,int label)
         {
             if (ModelState.IsValid)
-            {   
-                musician.roleInGroup = _context.roles.Find(roleInGroup);
-                _context.Add(musician);
+            {
+                disc.band = _context.bands.Find(band);
+                disc.label = _context.labels.Find(label);
+
+                _context.Add(disc);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(musician);
+            return View(disc);
         }
 
-        // GET: Musicians/Edit/5
+        // GET: Discs/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -75,24 +88,28 @@ namespace Disc_Store.Controllers.Admin
                 return NotFound();
             }
 
-            
-            var musician = _context.musicians.Include(p => p.roleInGroup).FirstOrDefault(m => m.id == id);
-            ViewBag.Role = new SelectList(_context.roles, "id", "roleName", musician.roleInGroup.id);
-            if (musician == null)
+            var  disc = _context.discs
+                .Include(d => d.band)
+                .Include(d=>d.label)
+                .FirstOrDefault(m => m.id == id);
+
+            ViewBag.BandId= new SelectList(_context.bands, "id", "name");
+            ViewBag.LableId= new SelectList(_context.labels, "id", "name");
+            if (disc == null)
             {
                 return NotFound();
             }
-            return View(musician);
+            return View(disc);
         }
 
-        // POST: Musicians/Edit/5
+        // POST: Discs/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("id,name")] Musician musician, int roleInGroup)
+        public async Task<IActionResult> Edit(int id, [Bind("id,name,dateOfPublish,price")] Disc disc, int band, int label)
         {
-            if (id != musician.id)
+            if (id != disc.id)
             {
                 return NotFound();
             }
@@ -101,13 +118,14 @@ namespace Disc_Store.Controllers.Admin
             {
                 try
                 {
-                    musician.roleInGroup = _context.roles.Find(roleInGroup);
-                    _context.Update(musician);
+                    disc.band = _context.bands.Find(band);
+                    disc.label = _context.labels.Find(label);
+                    _context.Update(disc);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!MusicianExists(musician.id))
+                    if (!DiscExists(disc.id))
                     {
                         return NotFound();
                     }
@@ -118,10 +136,10 @@ namespace Disc_Store.Controllers.Admin
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(musician);
+            return View(disc);
         }
 
-        // GET: Musicians/Delete/5
+        // GET: Discs/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -129,30 +147,30 @@ namespace Disc_Store.Controllers.Admin
                 return NotFound();
             }
 
-            var musician = await _context.musicians
+            var disc = await _context.discs
                 .FirstOrDefaultAsync(m => m.id == id);
-            if (musician == null)
+            if (disc == null)
             {
                 return NotFound();
             }
 
-            return View(musician);
+            return View(disc);
         }
 
-        // POST: Musicians/Delete/5
+        // POST: Discs/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var musician = await _context.musicians.FindAsync(id);
-            _context.musicians.Remove(musician);
+            var disc = await _context.discs.FindAsync(id);
+            _context.discs.Remove(disc);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool MusicianExists(int id)
+        private bool DiscExists(int id)
         {
-            return _context.musicians.Any(e => e.id == id);
+            return _context.discs.Any(e => e.id == id);
         }
     }
 }

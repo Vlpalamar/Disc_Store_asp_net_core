@@ -10,5 +10,6 @@ namespace Disc_Store.Entities
         public string name { get; set; }
 
         public ICollection<Disc> Discs { get; set; }
+
     }
 }

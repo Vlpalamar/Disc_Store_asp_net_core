@@ -7,7 +7,7 @@ using Disc_Store.Entities;
 
 namespace Disc_Store.Data
 {
-    public class ApplicationDbContext : IdentityDbContext
+    public class ApplicationDbContext : IdentityDbContext<MyUser>
     {
         public DbSet<Band> bands { get; set; }
         

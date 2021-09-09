@@ -1,0 +1,14 @@
+﻿
+@{
+    ViewData["Title"] = "Register new USer";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<form asp-action="RoleCreate" method="post">
+    <div class="form-group">
+        <label for="name">Новая роль</label>
+        <input name="name" class="form-control" />
+    </div>
+    <button type="submit" class="btn btn-primary">Добавить</button>
+</form> 
